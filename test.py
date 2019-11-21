@@ -5,7 +5,7 @@
 import random
 import time
 
-from __init__2 import Framework
+from Pyrallel.__init__ import Framework
 
 app = Framework(
     states={"count": 0, "stock": []},
