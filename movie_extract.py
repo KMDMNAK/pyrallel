@@ -7,19 +7,22 @@ from pyrallel.__init__ import Framework
 
 APP = Framework(
     states={
-        "frames": []
+        "frames": [],
+        "time_indexes":[]
     },
     conditions={
-        "read_and_write": True
+        "read_and_write": True,
+        "for_loop":True
     }
 )
 
+@APP.thread("for_loop","time_indexes")
+def execute_time(states):
+    @APP.prolife
 
-@APP.thread("read_and_write", "frames")
-def execute_frame(states):
-    pass
+@APP.condition_changer("")
 
-@APP.clone_thread(limit=10)
+@APP.prolife("read_and_write",limit=10)
 def read_and_write_frame(states):
     pass
 

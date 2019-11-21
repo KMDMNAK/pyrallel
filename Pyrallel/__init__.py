@@ -52,6 +52,7 @@ class Framework:
         self.__active_threads__ = []
 
     def thread(self, condition_name, *state_names):
+
         """
             decolate for threadable function.
 
