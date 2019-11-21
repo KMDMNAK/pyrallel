@@ -38,6 +38,9 @@ class Framework:
         self.__conditions__ = {"__event_watcher__": True}
         self.__conditions__.update(conditions)
         self.__condition_trigger_functions__ = {}
+        # not recommended set to None
+        self.__while_interval__ = loop_interval
+
         for condition_name in self.__conditions__.keys():
             self.__condition_trigger_functions__[condition_name] = []
 
@@ -95,10 +98,8 @@ class Framework:
         self.__active_threads__.append(thread)
         return None
 
-    def run(self, runnning_time=None, loop_interval=None):
-        # not recommended set to None
-        if loop_interval:
-            self.__while_interval__ = loop_interval
+    def run(self, runnning_time=None):
+
         print(self.__condition_trigger_functions__)
         print(self.__state_change_condition__)
 
@@ -107,7 +108,7 @@ class Framework:
             self.__change_conditions_thread__
         )
         self.add_active_thread(t)
-        for condition_name in self.__conditions__.keys():
+        for condition_name in self.__conditions__:
             self.__create_or_throught_threads__(condition_name)
 
         while True:
@@ -125,7 +126,7 @@ class Framework:
         """
             stop all threads
         """
-        for condition_name in self.__conditions__.keys():
+        for condition_name in self.__conditions__:
             self.__conditions__[condition_name] = False
 
     def __create_or_throught_threads__(self, condition_name):
@@ -182,7 +183,7 @@ class Framework:
         return None
 
     def __change_conditions_thread__(self, states):
-        if len(self.__state_change_queue__) == 0:
+        if not self.__state_change_queue__:
             return None
         queue, self.__state_change_queue__ = self.__state_change_queue__, []
         for changed_state_name in queue:
