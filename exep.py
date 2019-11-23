@@ -67,6 +67,16 @@ class C:
     def x(self):
         return self._x
 
+    @x.getter
+    def x(self):
+        print("get", self._x)
+        return self._x
+
+    @x.setter
+    def x(self, value):
+        self._x.append(value)
+        print("set", self._x)
+
     @property
     def y(self):
         return self._y
