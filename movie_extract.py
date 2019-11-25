@@ -3,48 +3,39 @@
 """
 
 import cv2
-from pyrallel.__init__ import Framework
+from pyrallel.application import Framework
+
+VIDEO_PATH = "sample.mp4"
+folder_path = "/img/"
+extension = ".jpg"
 
 APP = Framework(
     states={
-        "frames": [],
-        "time_indexes": []
+        # [(1,3),(5,7)]->[FPS*1,FPS*1+1,...,FPS*3,FPS*5,FPS*5+1,...,FPS*7]
+        "frame_indexes": [],
+        "capture": cv2.VideoCapture(VIDEO_PATH)
     },
     conditions={
-        "read_and_write": True,
-        "for_loop": True
+        "read_and_write": True
     }
 )
 
 
-@APP.thread("for_loop", "time_indexes")
-def execute_time(states):
-    pass
-
-@APP.condition_changer("")
-
-@APP.prolife("read_and_write", limit=10)
+@APP.prolife("read_and_write", "capture", "frame_indexes", options={"limit": 100})
 def read_and_write_frame(states):
-    pass
+    capture_frame_index = int(states.capture.get(
+        cv2.CAP_PROP_POS_FRAMES
+    ))  # 現在のフレーム位置の取得
+    target_frame_index = int(states.frame_indexes.pop())
+    if capture_frame_index != target_frame_index:
+        states.capture.set(cv2.CAP_PROP_POS_FRAMES, target_frame_index)
+    ret, frame = states.capture.read()
+    cv2.imwrite(folder_path + capture_frame_index + extension, frame)
+    return None
 
 
-VIDEO_PATH = ""
-CAPTURE = cv2.VideoCapture(VIDEO_PATH)
-
-
-def extract_images(time_indexes, mod=3):
-    """
-        each pairs of time indexes do not duplicate time range
-    """
-    # sort time
-    time_indexes = sorted(time_indexes, key=lambda x: x[0])
-    # whether is it valid time indexes
-    print(time_indexes)
-    all_frames_list = []
-    for start_time_index, end_time_index in time_indexes:
-        frames_list = self.extract_images_by_time(
-            start_time_index, end_time_index, mod)
-        if frames_list == []:
-            break
-        all_frames_list.extend(frames_list)
-    return all_frames_list
+@APP.change_condition("read_and_write","capture")
+def change_read_and_write(states):
+    if states.capture.isOpened():
+        return True
+    return False

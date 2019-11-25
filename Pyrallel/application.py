@@ -7,6 +7,9 @@ A -> checkValue? B : C
 import time
 import threading
 import logging
+from .state import States
+from .condition import ConditionHandler as Condition
+from .thread import ProlifeThread, LoopThread
 
 # ログの出力名を設定（1）
 logger = logging.getLogger('LoggingTest')
@@ -21,37 +24,14 @@ logger.addHandler(logging.StreamHandler())
 logger.addHandler(logging.FileHandler('debug.log', mode="w"))
 
 
-class States:
-    def __init__(self, states):
-        """
-            states={"count":0,"stock":[]}
-        """
-        self.state_names = []
-        for state_name in states.keys():
-            setattr(self, state_name, states[state_name])
-            self.state_names.append(state_name)
-
-
 class Framework:
     def __init__(self, states, conditions, loop_interval=None):
-        self.states = States(states)
-        self.__conditions__ = {"__event_watcher__": True}
-        self.__conditions__.update(conditions)
-        self.__condition_trigger_functions__ = {}
-        # not recommended set to None
+        self.__conditions__ = Condition(conditions)
+        self.__states__ = States(states, self.__conditions__)
         self.__while_interval__ = loop_interval
+        self.__threads__ = []
 
-        for condition_name in self.__conditions__.keys():
-            self.__condition_trigger_functions__[condition_name] = []
-
-        self.__state_change_condition__ = {}
-        for state_name in self.states.state_names:
-            self.__state_change_condition__[state_name] = []
-
-        self.__state_change_queue__ = []
-        self.__active_threads__ = []
-
-    def thread(self, condition_name, *state_names):
+    def loop(self, condition_name, *state_names, option=None):
         """
             decolate for threadable function.
 
@@ -61,63 +41,69 @@ class Framework:
 
         """
         def decolator_wrapper(threadable_function):
-            self.__condition_trigger_functions__[condition_name].append(
-                [threadable_function, *state_names]
+            """
+            print("in decolator loop")
+            print(threadable_function,
+                  self.__conditions__,
+                  condition_name,
+                  self.__states__,
+                  state_names)
+            """
+            print("in decolate ",condition_name)
+            self.__conditions__.__register_thread__(
+                condition_name,
+                LoopThread(
+                    threadable_function=threadable_function,
+                    conditions=self.__conditions__,
+                    condition_name=condition_name,
+                    states=self.__states__,
+                    willchange_state_names=state_names,
+                    option=option
+                )
             )
             return threadable_function
         return decolator_wrapper
 
-    def condition_changer(self, condition_name, *state_names):
-        """
-            decolate for functions that change condition
-        """
+    def prolife(self, condition_name, *state_names, option=None):
         def decolator_wrapper(threadable_function):
-            for state_name in state_names:
-                self.__state_change_condition__[state_name].append(
-                    (condition_name, threadable_function, state_names))
+            print(option)
+            self.__conditions__.__register_thread__(
+                condition_name,
+                ProlifeThread(
+                    threadable_function,
+                    self.__conditions__,
+                    condition_name,
+                    self.__states__,
+                    state_names,
+                    option=option
+                )
+            )
             return threadable_function
         return decolator_wrapper
 
-    def set_states(self, new_state):
-        changed_keys = []
-        for key in new_state.keys():
-            value = new_state[key]
-            if value is getattr(self.states, key):
-                continue
-
-            setattr(self.states, key, value)
-            changed_keys.append(key)
-        self.__dispatch_states_change__(changed_keys)
-        return None
-
-    def add_active_thread(self, thread):
+    def change_condition(self, condition_name, *state_names):
         """
-            activeなthreadをstockする.
-            TODO 重複するthreadの処理
+
         """
-        self.__active_threads__.append(thread)
-        return None
+        def decolator_wrapper(changer_function):
+            self.__states__.__register_state_to_condition__(
+                condition_name,
+                changer_function,
+                *state_names
+            )
+            return changer_function
+        return decolator_wrapper
 
     def run(self, runnning_time=None):
-
-        print(self.__condition_trigger_functions__)
-        print(self.__state_change_condition__)
-
-        t = self.__create_thread__(
-            "__event_watcher__",
-            self.__change_conditions_thread__
-        )
-        self.add_active_thread(t)
-        for condition_name in self.__conditions__:
-            self.__create_or_throught_threads__(condition_name)
-
+        self.__conditions__.__start__()
         while True:
             try:
                 if runnning_time:
                     logger.log(10, "in running time")
                     time.sleep(runnning_time)
-                    logger.log(10, "end runnning_time")
+                    logger.log(10, "end runnning time")
             except KeyboardInterrupt:
+                print("\nkey board interrupt\n")
                 break
             time.sleep(1)
         self.release_threads()
@@ -126,97 +112,4 @@ class Framework:
         """
             stop all threads
         """
-        for condition_name in self.__conditions__:
-            self.__conditions__[condition_name] = False
-
-    def __create_or_throught_threads__(self, condition_name):
-        """
-            FOR LOOP FUNCTION
-            Returs
-            None
-        """
-        condition = self.__conditions__.get(condition_name)
-
-        if condition is None:
-            raise BaseException("given condition doesn't exist")
-
-        if not condition:
-            return None
-
-        for threadable_function, *args in self.__condition_trigger_functions__[condition_name]:
-            print("create or throught args")
-            print(args)
-            t = self.__create_thread__(
-                condition_name, threadable_function, *args
-            )
-        return None
-
-    def __create_thread__(self, condition_name, threadable_function, *state_names):
-        """
-            threadable functionに対してconditionに基づくthreadを生成する.
-        """
-
-        def __threading__(self):
-            while self.__conditions__[condition_name]:
-                new_states = threadable_function(self.states)
-                if not new_states:
-                    continue
-                self.set_states(new_states)
-                if self.__while_interval__:
-                    print("thread is sleeping")
-                    time.sleep(self.__while_interval__)
-
-        t = threading.Thread(
-            target=__threading__,
-            args=(self,)
-        )
-        t.start()
-        self.add_active_thread(t)
-        return t
-
-    def __dispatch_states_change__(self, keys):
-        """
-            変更されたstateの名前をキューに保存
-        """
-        for key in keys:
-            self.__state_change_queue__.append(key)
-        return None
-
-    def __change_conditions_thread__(self, states):
-        if not self.__state_change_queue__:
-            return None
-        queue, self.__state_change_queue__ = self.__state_change_queue__, []
-        for changed_state_name in queue:
-            for condition_name, changer, all_args_states in self.__state_change_condition__[changed_state_name]:
-                self.__change_state_handler__(
-                    condition_name,
-                    changer,
-                    all_args_states
-                )
-        print("active threads: ", self.__active_threads__)
-        return None
-
-    def __change_state_handler__(self, condition_name, changer, all_args_states):
-        """
-            this function is for FOR LOOP
-        """
-        new_condition = changer(self.states)
-        if self.__conditions__[condition_name] == new_condition:
-            return None
-        logger.log(10, "condition changed : {0} to {1}".format(
-            condition_name, new_condition))
-        self.__conditions__[condition_name] = new_condition
-        self.__create_or_throught_threads__(condition_name)
-
-    def prolife(self, condition_name, *state_names):
-        def decolator_wrapper(threadable_function):
-            self.__condition_trigger_functions__[condition_name].append(
-                [threadable_function, *state_names]
-            )
-            return threadable_function
-        return decolator_wrapper
-    def __execute_prolife__(self,thread_name):
-        self.__prolife_functions[]
-        while self.condition():
-            pass
-        
+        self.__conditions__.__destory__()

@@ -82,9 +82,38 @@ class C:
         return self._y
 
 
+class D:
+    def __init__(self):
+        pass
+
+    def execute(self, states):
+        def thread(states):
+            while states.isRunning:
+                print("runnning!!")
+                time.sleep(1)
+            print("end")
+        t = threading.Thread(target=thread, args=(states,))
+        t.start()
+
+
+class D_cond:
+    def __init__(self):
+        self.isRunning = True
+
+    def changer(self):
+
+        while True:
+            time.sleep(3)
+            self.isRunning = not self.isRunning
+
+
 if __name__ == "__main__":
     """
         state自体を渡せば,引数をreactiveに渡せる.
-    """
     setattr(AC.states, "a", 532545)
     AC.execute()
+    """
+    d = D()
+    d_c = D_cond()
+    d.execute(d_c)
+    d_c.changer()

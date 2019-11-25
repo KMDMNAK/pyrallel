@@ -78,7 +78,7 @@ class Framework:
                     (condition_name, threadable_function, state_names))
             return threadable_function
         return decolator_wrapper
-
+    
     def set_states(self, new_state):
         changed_keys = []
         for key in new_state.keys():
