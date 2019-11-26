@@ -32,7 +32,7 @@ class ThreadBase:
                 setattr(self, option_name, option[option_name])
                 print("set ", option_name)
         if not getattr(self, "while_interval", None):
-            setattr(self, "while_interval", 0.1)
+            setattr(self, "while_interval", 0.001)
         print("thread's condition id is ", id(self.__conditions__))
 
     def __updated_states__(self):
@@ -50,15 +50,15 @@ class ThreadBase:
 
             # self.__states__.__show_values__()
             # self.__conditions__.__show_values__()
-        print("\n\n now {0} 's thread is ended\n\n".format(
-            self.__condition_name__))
+        """print("\n\n now {0} 's thread is ended\n\n".format(
+            self.__condition_name__))"""
         self.__running__ = False
 
     def __activate__(self):
         if not self.__running__:
             self.__running__ = True
-            print("\n\n now {0} 's thread is activated!\n\n".format(
-                self.__condition_name__))
+            """print("\n\n now {0} 's thread is activated!\n\n".format(
+                self.__condition_name__))"""
             t = threading.Thread(target=self.__threading__)
             t.start()
             self.__thread__ = t
@@ -83,7 +83,7 @@ class ProlifeThread(ThreadBase):
         self.__end_flag__ = False
 
     def __other_condition__(self):
-        prolife_limit = getattr(self, "prolife_limit")
+        prolife_limit = getattr(self, "prolife_limit",None)
         if prolife_limit is None:
             return True
         if prolife_limit > self.__thread_running__:

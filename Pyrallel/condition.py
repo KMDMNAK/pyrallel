@@ -26,8 +26,6 @@ class ConditionHandler:
         if getattr(self, condition_name) == new_condition:
             return None
         if new_condition:
-            print("\nnew thread!!! ", condition_name)
-            print(self.__condition_to_thread__[condition_name])
             #新しいthreadを作成 & 起動
             setattr(self, condition_name, new_condition)
             for each_thread in self.__condition_to_thread__[condition_name]:
