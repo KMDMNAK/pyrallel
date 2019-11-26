@@ -49,7 +49,7 @@ class Framework:
                   self.__states__,
                   state_names)
             """
-            print("in decolate ",condition_name)
+            print("in decolate ", condition_name)
             self.__conditions__.__register_thread__(
                 condition_name,
                 LoopThread(
@@ -96,16 +96,16 @@ class Framework:
 
     def run(self, runnning_time=None):
         self.__conditions__.__start__()
-        while True:
-            try:
+        try:
+            while True:
                 if runnning_time:
                     logger.log(10, "in running time")
                     time.sleep(runnning_time)
                     logger.log(10, "end runnning time")
-            except KeyboardInterrupt:
-                print("\nkey board interrupt\n")
-                break
-            time.sleep(1)
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("\nkey board interrupt\n")
+
         self.release_threads()
 
     def release_threads(self):

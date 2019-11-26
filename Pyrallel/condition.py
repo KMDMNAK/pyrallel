@@ -31,7 +31,6 @@ class ConditionHandler:
             #新しいthreadを作成 & 起動
             setattr(self, condition_name, new_condition)
             for each_thread in self.__condition_to_thread__[condition_name]:
-                print(each_thread.__threadable_function__)
                 each_thread.__activate__()
         setattr(self, condition_name, new_condition)
 
@@ -48,7 +47,9 @@ class ConditionHandler:
         for condition_name in self.__condition_names__:
             print("destory", condition_name)
             setattr(self, condition_name, False)
-            del(self.__condition_to_thread__[condition_name])
+            #self.__condition_to_thread__[condition_name].__destroy__(self)
+            self.__show_values__()
+            del (self.__condition_to_thread__[condition_name])
         print("destory id : ", id(self))
         self.__show_values__()
 

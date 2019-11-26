@@ -64,6 +64,9 @@ class ThreadBase:
             self.__thread__ = t
         return None
 
+    def __destroy__(self):
+        pass
+
 
 class ProlifeThread(ThreadBase):
     """
@@ -102,7 +105,9 @@ class ProlifeThread(ThreadBase):
     def __threading__(self):
         __test_count__ = 0
         while getattr(self.__conditions__, self.__condition_name__):
-
+            """print(self.__condition_name__, getattr(
+                self.__conditions__, self.__condition_name__))
+            """
             while not self.__other_condition__():
                 while not self.__end_flag__:
                     time.sleep(getattr(self, "while_interval"))
@@ -114,12 +119,10 @@ class ProlifeThread(ThreadBase):
                     self,)
             )
             t.start()
+            self.__active_threads__.append(t)
             # self.__active_threads__.append(t)
             if getattr(self, "while_interval"):
                 time.sleep(getattr(self, "while_interval"))
-            if __test_count__ % 5 == 0:
-                print("this is five ")
-                print(self.__thread_running__)
             __test_count__ += 1
         self.__running__ = False
         return None

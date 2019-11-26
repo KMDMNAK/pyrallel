@@ -15,5 +15,5 @@ def pro(states):
     states.stock.append(random.randint(1, 10))
     time.sleep(random.randint(1, 10))
 
-
-app.run()
+if __name__ == "__main__":
+    app.run()
