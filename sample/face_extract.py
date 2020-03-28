@@ -44,7 +44,7 @@ def correct_size(gray, x, y, w, h, percent=3):
     return x1, x2, y1, y2
 
 
-@APP.prolife("read", "images", "file_names")
+@APP.multiply("read", "images", "file_names")
 def read_image(states):
     if not states.file_names:
         return None
@@ -62,7 +62,7 @@ def change_read(states):
     return True
 
 
-@APP.prolife("detect_and_write", "images",option={"prolife_limit":30})
+@APP.multiply("detect_and_write", "images",option={"multiply_limit":30})
 def detect_and_write_face(states):
     if not states.images:
         return None

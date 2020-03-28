@@ -9,7 +9,7 @@ import threading
 import logging
 from .state import States
 from .condition import ConditionHandler as Condition
-from .thread import ProlifeThread, LoopThread
+from .thread import multiplyThread, LoopThread
 
 # ログの出力名を設定（1）
 logger = logging.getLogger('LoggingTest')
@@ -64,12 +64,12 @@ class Framework:
             return threadable_function
         return decolator_wrapper
 
-    def prolife(self, condition_name, *state_names, option=None):
+    def multiply(self, condition_name, *state_names, option=None):
         def decolator_wrapper(threadable_function):
             print(option)
             self.__conditions__.__register_thread__(
                 condition_name,
-                ProlifeThread(
+                multiplyThread(
                     threadable_function,
                     self.__conditions__,
                     condition_name,

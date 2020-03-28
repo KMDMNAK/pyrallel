@@ -1,4 +1,64 @@
 @startuml
-agent Condition
-agent 
+
+Node Application{
+    database State{
+        agent state1
+        agent state2
+        agent statem
+    }
+    artifact Condition{
+        agent condition1
+        agent condition2
+        agent condition3
+        agent conditionn
+    }
+    package SingleThread1
+    package SingleThread2
+}
+
+state1 -up-> condition1 :trigger
+state2 -up-> condition2 :trigger
+state2 -up-> condition3 :trigger
+statem -up-> conditionn :trigger
+statem -up-> condition1 :trigger
+
+condition3 -up-> SingleThread1
+conditionn -up-> SingleThread2
+@enduml
+
+@startuml
+
+Node Application{
+    database State{
+        agent state1
+        agent state2
+        agent statem
+    }
+    artifact Condition{
+        agent condition1
+        agent condition2
+        agent conditionn
+    }
+    package MultiplyThread1{
+        [multiply_condition1]
+        [running_confition1]
+    }
+    package MultiplyThread2{
+        [multiply_condition2]
+        [running_confition2]
+    }
+}
+
+state1 -down-> condition1 :trigger
+state2 -down-> condition2 :trigger
+state2 -down-> conditionn :trigger
+statem -down-> condition1 :trigger
+
+condition1 -up-> running_confition2
+condition2 -up-> running_confition1
+condition2 -up-> multiply_condition2
+conditionn -up-> multiply_condition1
+
+MultiplyThread1 -left-> State
+MultiplyThread2 -> State
 @enduml

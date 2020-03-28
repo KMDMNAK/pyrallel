@@ -85,7 +85,7 @@ def correct_size(gray, x, y, w, h, percent=3):
     return x1, x2, y1, y2
 
 
-@APP.prolife("write", "frames", option={"prolife_limit": 10})
+@APP.multiply("write", "frames", option={"multiply_limit": 10})
 def detect_and_write_face(states):
     if not states.frames:
         return None

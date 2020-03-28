@@ -10,7 +10,7 @@ app = Framework(
 )
 
 
-@app.prolife("start", "stock", option={"prolife_limit": 10})
+@app.multiply("start", "stock", option={"multiply_limit": 10})
 def pro(states):
     states.stock.append(random.randint(1, 10))
     time.sleep(random.randint(1, 10))

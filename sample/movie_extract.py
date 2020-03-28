@@ -62,7 +62,7 @@ def change_read(states):
     return True
 
 
-@APP.prolife("write", "frames")
+@APP.multiply("write", "frames")
 def read_and_write_frame(states):
     if not states.frames:
         return None

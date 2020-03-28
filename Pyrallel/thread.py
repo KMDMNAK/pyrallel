@@ -5,12 +5,12 @@ import time
 class Option:
     def __init__(self):
         self.while_interval = 0.01
-        self.prolife_limit = 100
+        self.multiply_limit = 100
 
 
 class ThreadBase:
     """
-        ProlifeとThreadにおける,conditionとの接続部分
+        multiplyとThreadにおける,conditionとの接続部分
     """
 
     def __init__(self, threadable_function, conditions, condition_name, states, willchange_state_names, option=None):
@@ -68,7 +68,7 @@ class ThreadBase:
         pass
 
 
-class ProlifeThread(ThreadBase):
+class multiplyThread(ThreadBase):
     """
         a
     """
@@ -83,16 +83,16 @@ class ProlifeThread(ThreadBase):
         self.__end_flag__ = False
 
     def __other_condition__(self):
-        prolife_limit = getattr(self, "prolife_limit",None)
-        if prolife_limit is None:
+        multiply_limit = getattr(self, "multiply_limit",None)
+        if multiply_limit is None:
             return True
-        if prolife_limit > self.__thread_running__:
+        if multiply_limit > self.__thread_running__:
             return True
         return False
 
     # 複製する関数
     def __create_threadable_function__(self, threadable_function):
-        def __prolife_template__(self):
+        def __multiply_template__(self):
             threadable_function(self.__states__)
             self.__updated_states__()
             # 終了判定
@@ -100,7 +100,7 @@ class ProlifeThread(ThreadBase):
             # 増殖threadが終了した場合,end flagを立てて,
             self.__end_flag__ = True
             return None
-        return __prolife_template__
+        return __multiply_template__
 
     def __threading__(self):
         __test_count__ = 0
